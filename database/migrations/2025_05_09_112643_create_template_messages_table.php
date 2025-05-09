@@ -11,14 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('telegram_messages', function (Blueprint $table) {
+        Schema::create('template_messages', function (Blueprint $table) {
             $table->id();
-            $table->text('content');
-            $table->boolean('is_sent')->default(false);
-            $table->timestamp('sent_at')->nullable();
+            $table->string('name')->unique();
             $table->string('file')->nullable();
-            $table->integer('success')->default(0);
-            $table->integer('total')->default(0);
+            $table->string('text')->nullable();
+            $table->boolean('active')->default(true);
+            $table->string('button_color')->default('primary');
             $table->timestamps();
         });
     }
@@ -28,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('telegram_messages');
+        Schema::dropIfExists('template_messages');
     }
 };

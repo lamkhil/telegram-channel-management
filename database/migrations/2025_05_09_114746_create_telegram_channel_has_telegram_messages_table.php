@@ -11,14 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('telegram_messages', function (Blueprint $table) {
+        Schema::create('channel_has_messages', function (Blueprint $table) {
             $table->id();
-            $table->text('content');
+            $table->foreignId('telegram_channel_id');
+            $table->foreignId('telegram_message_id');
+            $table->foreign('telegram_channel_id')->references('id')->on('telegram_channels')->onDelete('cascade');
+            $table->foreign('telegram_message_id')->references('id')->on('telegram_messages')->onDelete('cascade');
             $table->boolean('is_sent')->default(false);
             $table->timestamp('sent_at')->nullable();
-            $table->string('file')->nullable();
-            $table->integer('success')->default(0);
-            $table->integer('total')->default(0);
             $table->timestamps();
         });
     }
@@ -28,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('telegram_messages');
+        Schema::dropIfExists('channel_has_messages');
     }
 };

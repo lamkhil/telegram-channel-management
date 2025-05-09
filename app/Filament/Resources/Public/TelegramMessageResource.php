@@ -34,24 +34,20 @@ class TelegramMessageResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('created_at', 'desc')
             ->columns([
-                Tables\Columns\TextColumn::make('id')
-                    ->sortable()
-                    ->searchable()
-                    ->label('ID'),
-                Tables\Columns\TextColumn::make('channel.name')
+                Tables\Columns\TextColumn::make('channels.name')
                     ->sortable()
                     ->searchable()
                     ->label('Channel'),
                 Tables\Columns\TextColumn::make('content')
                     ->sortable()
+                    ->wrap()
                     ->searchable()
                     ->label('Message'),
                 Tables\Columns\IconColumn::make('is_sent')
                     ->label('Sent')
-                    ->boolean()
-                    ->trueIcon('heroicon-o-check')
-                    ->falseIcon('heroicon-o-x'),
+                    ->boolean(),
                 Tables\Columns\TextColumn::make('sent_at')
                     ->sortable()
                     ->dateTime()
@@ -65,12 +61,8 @@ class TelegramMessageResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
             ]);
     }
 
@@ -84,9 +76,7 @@ class TelegramMessageResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListTelegramMessages::route('/'),
-            'create' => Pages\CreateTelegramMessage::route('/create'),
-            'edit' => Pages\EditTelegramMessage::route('/{record}/edit'),
+            'index' => Pages\ListTelegramMessages::route('/')
         ];
     }
 }

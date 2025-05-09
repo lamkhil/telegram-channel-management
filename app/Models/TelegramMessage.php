@@ -6,8 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class TelegramMessage extends Model
 {
-    public function channel()
+    public function channels()
     {
-        return $this->belongsTo(TelegramChannel::class, 'telegram_channel_id');
+        return $this->belongsToMany(TelegramChannel::class, 'channel_has_messages')
+            ->withPivot('is_sent', 'sent_at')
+            ->withTimestamps();
     }
 }

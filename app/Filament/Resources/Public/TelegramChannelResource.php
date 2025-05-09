@@ -48,6 +48,9 @@ class TelegramChannelResource extends Resource
                     ->native(false)
                     ->required()
                     ->label('Type'),
+                Forms\Components\Toggle::make('default')
+                    ->label('Default')
+                    ->helperText('Set this channel as default for sending messages'),
             ]);
     }
 
@@ -84,6 +87,8 @@ class TelegramChannelResource extends Resource
                         };
                     })
                     ->label('Type'),
+                Tables\Columns\ToggleColumn::make('default')
+                    ->sortable(),
             ])
             ->filters([
                 //

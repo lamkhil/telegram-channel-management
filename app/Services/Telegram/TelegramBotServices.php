@@ -1,78 +1,14 @@
-<?php
-
+<?php 
 namespace App\Services\Telegram;
 use Illuminate\Support\Facades\Http;
 
-class TelegramBotServices
-{
-    public static function getBot($token) : BotGetMeResponse
-    {
-        $response = Http::get("https://api.telegram.org/bot{$token}/getMe");
-
-        if ($response->failed() || !$response->json('ok')) {
-            return new BotGetMeResponse(
-                false,
-                new Bot('', '', '', false, false, false, false, false)
-            );
-        }
-
-        $botData = $response->json('result');
-
-        return new BotGetMeResponse(
-            true,
-            new Bot(
-                $botData['id'],
-                $botData['first_name'],
-                $botData['username'],
-                $botData['can_join_groups'],
-                $botData['can_read_all_group_messages'],
-                $botData['supports_inline_queries'],
-                $botData['can_connect_to_business'],
-                $botData['has_main_web_app']
-            )
-        );
-    }
-
-    public static function sendMessage($token, $chatId, $message) : SendMessageResponse
-    {
-        $response = Http::post("https://api.telegram.org/bot{$token}/sendMessage", [
-            'chat_id' => $chatId,
-            'text' => $message,
-        ]);
-
-        if ($response->failed() || !$response->json('ok')) {
-            return new SendMessageResponse(
-                false,
-                new TelegramMessage(0, new TelegramChat(0, '', ''), 0, ''),
-                $response->json('description'),
-                $response->json('error_code')
-            );
-        }
-        $messageData = $response->json('result');
-        $chatData = $messageData['chat'];
-        return new SendMessageResponse(
-            true,
-            new TelegramMessage(
-                $messageData['message_id'],
-                new TelegramChat(
-                    $chatData['id'],
-                    $chatData['title'] ?? '',
-                    $chatData['type']
-                ),
-                $messageData['date'],
-                $messageData['text'] ?? ''
-            )
-        );
-    }
-}
 
 class BotGetMeResponse
 {
     public function __construct(
         public bool $ok,
         public Bot $result,
-    ) {
-    }
+    ) {}
 
     public static function fromArray(array $data): self
     {
@@ -94,8 +30,7 @@ class Bot
         public bool $supports_inline_queries,
         public bool $can_connect_to_business,
         public bool $has_main_web_app,
-    ) {
-    }
+    ) {}
 
     public static function fromArray(array $data): self
     {
@@ -119,14 +54,53 @@ class SendMessageResponse
         public TelegramMessage $result,
         public ?string $description = null,
         public ?int $error_code = null,
-    ) {
-    }
+    ) {}
 
     public static function fromArray(array $data): self
     {
         return new self(
             ok: $data['ok'],
             result: TelegramMessage::fromArray($data['result']),
+            description: $data['description'] ?? null,
+            error_code: $data['error_code'] ?? null,
+        );
+    }
+}
+
+class SendPhotoResponse
+{
+    public function __construct(
+        public bool $ok,
+        public ?TelegramMessage $result,
+        public ?string $description = null,
+        public ?int $error_code = null,
+    ) {}
+
+    public static function fromArray(array $data): self
+    {
+        return new self(
+            ok: $data['ok'],
+            result: isset($data['result']) ? TelegramMessage::fromArray($data['result']) : null,
+            description: $data['description'] ?? null,
+            error_code: $data['error_code'] ?? null,
+        );
+    }
+}
+
+class SendAnimationResponse
+{
+    public function __construct(
+        public bool $ok,
+        public ?TelegramMessage $result,
+        public ?string $description = null,
+        public ?int $error_code = null,
+    ) {}
+
+    public static function fromArray(array $data): self
+    {
+        return new self(
+            ok: $data['ok'],
+            result: isset($data['result']) ? TelegramMessage::fromArray($data['result']) : null,
             description: $data['description'] ?? null,
             error_code: $data['error_code'] ?? null,
         );
@@ -140,8 +114,7 @@ class TelegramMessage
         public TelegramChat $chat,
         public int $date,
         public string $text,
-    ) {
-    }
+    ) {}
 
     public static function fromArray(array $data): self
     {
@@ -160,8 +133,7 @@ class TelegramChat
         public int|string $id,
         public string $title,
         public string $type,
-    ) {
-    }
+    ) {}
 
     public static function fromArray(array $data): self
     {
@@ -170,5 +142,96 @@ class TelegramChat
             title: $data['title'] ?? '',
             type: $data['type'],
         );
+    }
+}
+
+
+class TelegramBotServices
+{
+    public static function getBot($token): BotGetMeResponse
+    {
+        $response = Http::get("https://api.telegram.org/bot{$token}/getMe");
+
+        if ($response->failed() || !$response->json('ok')) {
+            return new BotGetMeResponse(
+                false,
+                new Bot('', '', '', false, false, false, false, false)
+            );
+        }
+
+        return BotGetMeResponse::fromArray($response->json());
+    }
+
+    public static function sendMessage($token, $chatId, $message): SendMessageResponse
+    {
+        $response = Http::post("https://api.telegram.org/bot{$token}/sendMessage", [
+            'chat_id' => $chatId,
+            'text' => $message,
+        ]);
+
+        if ($response->failed() || !$response->json('ok')) {
+            return new SendMessageResponse(
+                false,
+                new TelegramMessage(0, new TelegramChat(0, '', ''), 0, ''),
+                $response->json('description'),
+                $response->json('error_code')
+            );
+        }
+
+        return SendMessageResponse::fromArray($response->json());
+    }
+
+    public static function sendPhoto($token, $chatId, $photoUrlOrPath, $caption = ''): SendPhotoResponse
+    {
+        $url = "https://api.telegram.org/bot{$token}/sendPhoto";
+        $isFile = file_exists($photoUrlOrPath);
+
+        if ($isFile) {
+            $response = Http::attach(
+                'photo', file_get_contents($photoUrlOrPath), basename($photoUrlOrPath)
+            )->post($url, [
+                'chat_id' => $chatId,
+                'caption' => $caption,
+            ]);
+        } else {
+            $response = Http::post($url, [
+                'chat_id' => $chatId,
+                'photo' => $photoUrlOrPath,
+                'caption' => $caption,
+            ]);
+        }
+
+        if ($response->failed() || !$response->json('ok')) {
+            return new SendPhotoResponse(false, null, $response->json('description'), $response->json('error_code'));
+        }
+
+        return SendPhotoResponse::fromArray($response->json());
+    }
+
+    public static function sendAnimation($token, $chatId, $gifUrlOrPath, $caption = ''): SendAnimationResponse
+    {
+        $url = "https://api.telegram.org/bot{$token}/sendAnimation";
+        $isFile = file_exists($gifUrlOrPath);
+
+        if ($isFile) {
+            $response = Http::attach(
+                'animation', file_get_contents($gifUrlOrPath), basename($gifUrlOrPath)
+            )->post($url, [
+                'chat_id' => $chatId,
+                'caption' => $caption,
+            ]);
+        } else {
+            $response = Http::post($url, [
+                'chat_id' => $chatId,
+                'animation' => $gifUrlOrPath,
+                'caption' => $caption,
+            ]);
+        }
+
+        if ($response->failed() || !$response->json('ok')) {
+            return new SendAnimationResponse(false, null, $response->json('description'), $response->json('error_code'));
+        }
+
+        return SendAnimationResponse::fromArray($response->json());
     }
 }

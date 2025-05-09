@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('chat_id'); // chat_id seperti -100xxxx
             $table->string('type')->default('public');
+            $table->boolean('default')->default(false);
             $table->timestamps();
         });
     }
