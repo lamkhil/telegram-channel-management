@@ -127,6 +127,10 @@ class ListTelegramMessages extends ListRecords implements HasForms
                     return;
                 }
 
+                if (empty($message)) {
+                    $message = ' ';
+                }
+
                 $telegramMessage = TelegramMessage::create([
                     'content' => $message,
                     'file' => $file,
