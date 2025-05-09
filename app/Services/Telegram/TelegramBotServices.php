@@ -191,13 +191,13 @@ class TelegramBotServices
                 'photo', file_get_contents($photoUrlOrPath), basename($photoUrlOrPath)
             )->post($url, [
                 'chat_id' => $chatId,
-                'caption' => $caption,
+                'caption' => $caption?? '',
             ]);
         } else {
             $response = Http::post($url, [
                 'chat_id' => $chatId,
                 'photo' => $photoUrlOrPath,
-                'caption' => $caption,
+                'caption' => $caption?? '',
             ]);
         }
 
@@ -218,13 +218,13 @@ class TelegramBotServices
                 'animation', file_get_contents($gifUrlOrPath), basename($gifUrlOrPath)
             )->post($url, [
                 'chat_id' => $chatId,
-                'caption' => $caption,
+                'caption' => $caption ?? '',
             ]);
         } else {
             $response = Http::post($url, [
                 'chat_id' => $chatId,
                 'animation' => $gifUrlOrPath,
-                'caption' => $caption,
+                'caption' => $caption?? '',
             ]);
         }
 
@@ -245,13 +245,13 @@ class TelegramBotServices
                 'document', file_get_contents($documentUrlOrPath), basename($documentUrlOrPath)
             )->post($url, [
                 'chat_id' => $chatId,
-                'caption' => $caption,
+                'caption' => $caption?? '',
             ]);
         } else {
             $response = Http::post($url, [
                 'chat_id' => $chatId,
                 'document' => $documentUrlOrPath,
-                'caption' => $caption,
+                'caption' => $caption?? '',
             ]);
         }
 
@@ -272,13 +272,13 @@ class TelegramBotServices
                 'audio', file_get_contents($audioUrlOrPath), basename($audioUrlOrPath)
             )->post($url, [
                 'chat_id' => $chatId,
-                'caption' => $caption,
+                'caption' => $caption?? '',
             ]);
         } else {
             $response = Http::post($url, [
                 'chat_id' => $chatId,
                 'audio' => $audioUrlOrPath,
-                'caption' => $caption,
+                'caption' => $caption?? '',
             ]);
         }
 
@@ -299,13 +299,13 @@ class TelegramBotServices
                 'video', file_get_contents($videoUrlOrPath), basename($videoUrlOrPath)
             )->post($url, [
                 'chat_id' => $chatId,
-                'caption' => $caption,
+                'caption' => $caption?? '',
             ]);
         } else {
             $response = Http::post($url, [
                 'chat_id' => $chatId,
                 'video' => $videoUrlOrPath,
-                'caption' => $caption,
+                'caption' => $caption?? '',
             ]);
         }
 
