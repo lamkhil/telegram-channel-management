@@ -119,11 +119,6 @@ class ListTelegramMessages extends ListRecords implements HasForms
                 }
 
                 if ($file == null && $message == null) {
-                    Notification::make('empty')
-                        ->title('Oopss!!')
-                        ->body('Empty Message!!')
-                        ->danger()
-                        ->send();
                     return;
                 }
 
