@@ -81,6 +81,7 @@ class ListTelegramMessages extends ListRecords implements HasForms
                     ->options(
                         TelegramChannel::all()->pluck('name', 'id')
                     )
+                    ->required()
                     ->native(false)
                     ->default(TelegramChannel::where('default', true)->pluck('id')->toArray())
 
@@ -106,7 +107,23 @@ class ListTelegramMessages extends ListRecords implements HasForms
                 $file = $data['file'];
                 $channels = $data['telegram_channel_ids'];
 
+
+
+                if (count($channels) == 0) {
+                    Notification::make('konekinChannel')
+                        ->title('Oops!!')
+                        ->body('Choose your channel first!!!')
+                        ->danger()
+                        ->send();
+                    return;
+                }
+
                 if (empty($file) && empty($message)) {
+                    Notification::make('empty')
+                        ->title('Oopss!!')
+                        ->body('Empty Message!!')
+                        ->danger()
+                        ->send();
                     return;
                 }
 
