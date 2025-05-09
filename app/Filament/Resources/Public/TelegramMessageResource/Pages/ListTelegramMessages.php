@@ -148,7 +148,7 @@ class ListTelegramMessages extends ListRecords implements HasForms
                             $channel = TelegramChannel::find($chatId);
                             $bot = $channel->bot;
 
-                            ChannelHasMessage::create([
+                            $channelMessage = ChannelHasMessage::create([
                                 'telegram_channel_id' => $chatId,
                                 'telegram_message_id' => $telegramMessageId,
                             ]);
@@ -169,6 +169,11 @@ class ListTelegramMessages extends ListRecords implements HasForms
                             } else {
                                 $result = TelegramBotServices::sendMessage($bot->token, $channel->chat_id, $message);
                             }
+
+                            
+                            $channelMessage->update([
+                                'message_id' => $result?->result?->message_id ?? null
+                            ]);
 
                             return [
                                 'ok' => $result->ok ?? false,
