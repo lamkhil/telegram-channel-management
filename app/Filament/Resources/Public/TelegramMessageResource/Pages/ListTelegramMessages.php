@@ -23,6 +23,7 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Support\Colors\Color;
 use Illuminate\Contracts\View\View;
+use Laravel\Octane\Facades\Octane;
 
 class ListTelegramMessages extends ListRecords implements HasForms
 {
@@ -52,7 +53,9 @@ class ListTelegramMessages extends ListRecords implements HasForms
                 ->color(Color::hex($template->button_color))
                 ->action(function ($set) use ($template) {
                     $set('message', $template->text);
-                    $set('file', $template->file);
+                    if ($template->file) {
+                        $set('file', [$template->file]);
+                    }
                 });
         }
 
@@ -69,7 +72,6 @@ class ListTelegramMessages extends ListRecords implements HasForms
                     ->maxSize(1024 * 10)
                     ->columnSpanFull(),
                 Textarea::make('message')
-                    ->required()
                     ->autosize()
                     ->label('Message'),
                 ComponentsActions::make($this->getTemplate()),
@@ -104,6 +106,10 @@ class ListTelegramMessages extends ListRecords implements HasForms
                 $file = $data['file'];
                 $channels = $data['telegram_channel_ids'];
 
+                if (empty($file) && empty($message)) {
+                    return;
+                }
+
                 $telegramMessage = TelegramMessage::create([
                     'content' => $message,
                     'file' => $file,
@@ -111,70 +117,82 @@ class ListTelegramMessages extends ListRecords implements HasForms
                     'sent_at' => now(),
                 ]);
 
-                $sent = true;
-
                 $success = 0;
 
                 $total = count($channels);
 
-                foreach ($channels as $chatId) {
-                    $channel = TelegramChannel::find($chatId);
-                    $bot = $channel->bot;
+                $telegramMessageId = $telegramMessage->id;
 
-                    ChannelHasMessage::create([
-                        'telegram_channel_id' => $chatId,
-                        'telegram_message_id' => $telegramMessage->id,
-                    ]);
+                $fileUrl = $file != null ? asset('storage/' . $file) : null;
 
-                    if ($file) {
-                        $extension = strtolower($file->getClientOriginalExtension());
+                $results = Octane::concurrently(
+                    collect($channels)->map(fn($chatId) => function () use ($chatId, $telegramMessageId, $message, $fileUrl) {
+                        try {
+                            $channel = TelegramChannel::find($chatId);
+                            $bot = $channel->bot;
 
-                        if (in_array($extension, ['jpg', 'jpeg', 'png'])) {
-                            $result = TelegramBotServices::sendPhoto($bot->token, $channel->chat_id, $file, $message);
-                        } elseif (in_array($extension, ['mp4', 'mov'])) {
-                            try {
-                                $result = TelegramBotServices::sendAnimation($bot->token, $channel->chat_id, $file, $message);
-                            } catch (\Exception $e) {
-                                $result = TelegramBotServices::sendVideo($bot->token, $channel->chat_id, $file, $message);
+                            ChannelHasMessage::create([
+                                'telegram_channel_id' => $chatId,
+                                'telegram_message_id' => $telegramMessageId,
+                            ]);
+
+                            if ($fileUrl) {
+                                $extension = strtolower(pathinfo($fileUrl, PATHINFO_EXTENSION));
+                                if (in_array($extension, ['jpg', 'jpeg', 'png'])) {
+                                    $result = TelegramBotServices::sendPhoto($bot->token, $channel->chat_id, $fileUrl, $message);
+                                } elseif (in_array($extension, ['mp4', 'mov', 'gif', 'webp'])) {
+                                    try {
+                                        $result = TelegramBotServices::sendAnimation($bot->token, $channel->chat_id, $fileUrl, $message);
+                                    } catch (\Exception $e) {
+                                        $result = TelegramBotServices::sendVideo($bot->token, $channel->chat_id, $fileUrl, $message);
+                                    }
+                                } else {
+                                    $result = TelegramBotServices::sendDocument($bot->token, $channel->chat_id, $fileUrl, $message);
+                                }
+                            } else {
+                                $result = TelegramBotServices::sendMessage($bot->token, $channel->chat_id, $message);
                             }
-                        } elseif (in_array($extension, ['gif', 'webp'])) {
-                            $result = TelegramBotServices::sendAnimation($bot->token, $channel->chat_id, $file, $message);
-                        } else {
-                            // fallback kirim sebagai document
-                            $result = TelegramBotServices::sendDocument($bot->token, $channel->chat_id, $file, $message);
+
+                            return [
+                                'ok' => $result->ok ?? false,
+                                'channel' => $channel->name,
+                                'description' => $result->description ?? '',
+                            ];
+                        } catch (\Throwable $e) {
+                            return [
+                                'ok' => false,
+                                'channel' => $chatId,
+                                'description' => $e->getMessage(),
+                            ];
                         }
-                    } else {
-                        // Kirim teks saja
-                        $result = TelegramBotServices::sendMessage($bot->token, $channel->chat_id, $message);
-                    }
+                    })->all()
+                );
 
-
-                    if ($result->ok) {
+                $success = 0;
+                foreach ($results as $result) {
+                    if ($result['ok']) {
                         Notification::make()
-                            ->title('Message Sent to '.$channel->name )
+                            ->title('Message Sent to ' . $result['channel'])
                             ->success()
                             ->send();
                         $success++;
                     } else {
                         Notification::make()
-                            ->title('Failed to send message to '.$channel->name)
-                            ->body($result->description)
+                            ->title('Failed to send message to ' . $result['channel'])
+                            ->body($result['description'])
                             ->danger()
                             ->send();
-
-                        $sent = false;
                     }
                 }
 
                 $telegramMessage->update([
-                    'is_sent' => $sent,
+                    'is_sent' => $success === $total,
                     'sent_at' => now(),
                     'success' => $success,
                     'total' => $total,
                 ]);
 
                 $this->form->fill();
-
             });
     }
 }

@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('telegram_messages', function (Blueprint $table) {
             $table->id();
-            $table->text('content');
+            $table->text('content')->nullable();
             $table->boolean('is_sent')->default(false);
             $table->timestamp('sent_at')->nullable();
             $table->string('file')->nullable();
