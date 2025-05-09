@@ -25,9 +25,10 @@ class TelegramBotResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-cog-6-tooth';
 
-    protected static ?string $modelLabel = "Bot Settings";
-
     protected static ?string $navigationGroup = 'Management';
+
+
+    protected static ?string $navigationLabel = "Bot Settings";
 
     public static function form(Form $form): Form
     {
