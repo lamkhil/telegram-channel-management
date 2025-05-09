@@ -234,4 +234,85 @@ class TelegramBotServices
 
         return SendAnimationResponse::fromArray($response->json());
     }
+
+    public static function sendDocument($token, $chatId, $documentUrlOrPath, $caption = ''): SendPhotoResponse
+    {
+        $url = "https://api.telegram.org/bot{$token}/sendDocument";
+        $isFile = file_exists($documentUrlOrPath);
+
+        if ($isFile) {
+            $response = Http::attach(
+                'document', file_get_contents($documentUrlOrPath), basename($documentUrlOrPath)
+            )->post($url, [
+                'chat_id' => $chatId,
+                'caption' => $caption,
+            ]);
+        } else {
+            $response = Http::post($url, [
+                'chat_id' => $chatId,
+                'document' => $documentUrlOrPath,
+                'caption' => $caption,
+            ]);
+        }
+
+        if ($response->failed() || !$response->json('ok')) {
+            return new SendPhotoResponse(false, null, $response->json('description'), $response->json('error_code'));
+        }
+
+        return SendPhotoResponse::fromArray($response->json());
+    }
+
+    public static function sendAudio($token, $chatId, $audioUrlOrPath, $caption = ''): SendPhotoResponse
+    {
+        $url = "https://api.telegram.org/bot{$token}/sendAudio";
+        $isFile = file_exists($audioUrlOrPath);
+
+        if ($isFile) {
+            $response = Http::attach(
+                'audio', file_get_contents($audioUrlOrPath), basename($audioUrlOrPath)
+            )->post($url, [
+                'chat_id' => $chatId,
+                'caption' => $caption,
+            ]);
+        } else {
+            $response = Http::post($url, [
+                'chat_id' => $chatId,
+                'audio' => $audioUrlOrPath,
+                'caption' => $caption,
+            ]);
+        }
+
+        if ($response->failed() || !$response->json('ok')) {
+            return new SendPhotoResponse(false, null, $response->json('description'), $response->json('error_code'));
+        }
+
+        return SendPhotoResponse::fromArray($response->json());
+    }
+
+    public static function sendVideo($token, $chatId, $videoUrlOrPath, $caption = ''): SendPhotoResponse
+    {
+        $url = "https://api.telegram.org/bot{$token}/sendVideo";
+        $isFile = file_exists($videoUrlOrPath);
+
+        if ($isFile) {
+            $response = Http::attach(
+                'video', file_get_contents($videoUrlOrPath), basename($videoUrlOrPath)
+            )->post($url, [
+                'chat_id' => $chatId,
+                'caption' => $caption,
+            ]);
+        } else {
+            $response = Http::post($url, [
+                'chat_id' => $chatId,
+                'video' => $videoUrlOrPath,
+                'caption' => $caption,
+            ]);
+        }
+
+        if ($response->failed() || !$response->json('ok')) {
+            return new SendPhotoResponse(false, null, $response->json('description'), $response->json('error_code'));
+        }
+
+        return SendPhotoResponse::fromArray($response->json());
+    }
 }

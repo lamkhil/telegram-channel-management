@@ -127,10 +127,6 @@ class ListTelegramMessages extends ListRecords implements HasForms
                     return;
                 }
 
-                if (empty($message)) {
-                    $message = ' ';
-                }
-
                 $telegramMessage = TelegramMessage::create([
                     'content' => $message,
                     'file' => $file,
@@ -161,14 +157,12 @@ class ListTelegramMessages extends ListRecords implements HasForms
                                 $extension = strtolower(pathinfo($fileUrl, PATHINFO_EXTENSION));
                                 if (in_array($extension, ['jpg', 'jpeg', 'png'])) {
                                     $result = TelegramBotServices::sendPhoto($bot->token, $channel->chat_id, $fileUrl, $message);
-                                } elseif (in_array($extension, ['mp4', 'mov'])) {
+                                } else if (in_array($extension, ['mp4', 'mov'])) {
                                     $result = TelegramBotServices::sendVideo($bot->token, $channel->chat_id, $fileUrl, $message);
-                                } elseif (in_array($extension, ['mp3', 'wav'])) {
+                                } else if (in_array($extension, ['mp3', 'wav'])) {
                                     $result = TelegramBotServices::sendAudio($bot->token, $channel->chat_id, $fileUrl, $message);
-                                } elseif (in_array($extension, ['gif'])) {
+                                } else if (in_array($extension, ['gif'])) {
                                     $result = TelegramBotServices::sendAnimation($bot->token, $channel->chat_id, $fileUrl, $message);
-                                } else {
-                                    $result = TelegramBotServices::sendDocument($bot->token, $channel->chat_id, $fileUrl, $message);
                                 }
                             } else {
                                 $result = TelegramBotServices::sendMessage($bot->token, $channel->chat_id, $message);
