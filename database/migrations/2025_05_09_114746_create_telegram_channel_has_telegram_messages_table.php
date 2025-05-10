@@ -13,12 +13,14 @@ return new class extends Migration
     {
         Schema::create('channel_has_messages', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->nullable()->constrained()->onDelete('cascade');
             $table->foreignId('telegram_channel_id');
             $table->foreignId('telegram_message_id');
             $table->foreign('telegram_channel_id')->references('id')->on('telegram_channels')->onDelete('cascade');
             $table->foreign('telegram_message_id')->references('id')->on('telegram_messages')->onDelete('cascade');
             $table->boolean('is_sent')->default(false);
             $table->timestamp('sent_at')->nullable();
+            $table->string('message_id')->nullable();
             $table->timestamps();
         });
     }

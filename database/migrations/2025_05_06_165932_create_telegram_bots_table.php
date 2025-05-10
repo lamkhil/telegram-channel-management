@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('telegram_bots', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('user_id')->nullable()->constrained()->onDelete('cascade');
             $table->string('name');
             $table->string('bot_username');
             $table->text('token');

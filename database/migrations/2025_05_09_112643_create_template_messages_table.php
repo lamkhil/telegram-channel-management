@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('template_messages', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->nullable()->constrained()->onDelete('cascade');
             $table->string('name')->unique();
             $table->string('file')->nullable();
             $table->string('text')->nullable();
