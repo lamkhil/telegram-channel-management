@@ -1,5 +1,7 @@
-<?php 
+<?php
+
 namespace App\Services\Telegram;
+
 use Illuminate\Support\Facades\Http;
 
 
@@ -188,16 +190,18 @@ class TelegramBotServices
 
         if ($isFile) {
             $response = Http::attach(
-                'photo', file_get_contents($photoUrlOrPath), basename($photoUrlOrPath)
+                'photo',
+                file_get_contents($photoUrlOrPath),
+                basename($photoUrlOrPath)
             )->post($url, [
                 'chat_id' => $chatId,
-                'caption' => $caption?? '',
+                'caption' => $caption ?? '',
             ]);
         } else {
             $response = Http::post($url, [
                 'chat_id' => $chatId,
                 'photo' => $photoUrlOrPath,
-                'caption' => $caption?? '',
+                'caption' => $caption ?? '',
             ]);
         }
 
@@ -215,7 +219,9 @@ class TelegramBotServices
 
         if ($isFile) {
             $response = Http::attach(
-                'animation', file_get_contents($gifUrlOrPath), basename($gifUrlOrPath)
+                'animation',
+                file_get_contents($gifUrlOrPath),
+                basename($gifUrlOrPath)
             )->post($url, [
                 'chat_id' => $chatId,
                 'caption' => $caption ?? '',
@@ -224,7 +230,7 @@ class TelegramBotServices
             $response = Http::post($url, [
                 'chat_id' => $chatId,
                 'animation' => $gifUrlOrPath,
-                'caption' => $caption?? '',
+                'caption' => $caption ?? '',
             ]);
         }
 
@@ -242,16 +248,18 @@ class TelegramBotServices
 
         if ($isFile) {
             $response = Http::attach(
-                'document', file_get_contents($documentUrlOrPath), basename($documentUrlOrPath)
+                'document',
+                file_get_contents($documentUrlOrPath),
+                basename($documentUrlOrPath)
             )->post($url, [
                 'chat_id' => $chatId,
-                'caption' => $caption?? '',
+                'caption' => $caption ?? '',
             ]);
         } else {
             $response = Http::post($url, [
                 'chat_id' => $chatId,
                 'document' => $documentUrlOrPath,
-                'caption' => $caption?? '',
+                'caption' => $caption ?? '',
             ]);
         }
 
@@ -269,16 +277,18 @@ class TelegramBotServices
 
         if ($isFile) {
             $response = Http::attach(
-                'audio', file_get_contents($audioUrlOrPath), basename($audioUrlOrPath)
+                'audio',
+                file_get_contents($audioUrlOrPath),
+                basename($audioUrlOrPath)
             )->post($url, [
                 'chat_id' => $chatId,
-                'caption' => $caption?? '',
+                'caption' => $caption ?? '',
             ]);
         } else {
             $response = Http::post($url, [
                 'chat_id' => $chatId,
                 'audio' => $audioUrlOrPath,
-                'caption' => $caption?? '',
+                'caption' => $caption ?? '',
             ]);
         }
 
@@ -296,16 +306,18 @@ class TelegramBotServices
 
         if ($isFile) {
             $response = Http::attach(
-                'video', file_get_contents($videoUrlOrPath), basename($videoUrlOrPath)
+                'video',
+                file_get_contents($videoUrlOrPath),
+                basename($videoUrlOrPath)
             )->post($url, [
                 'chat_id' => $chatId,
-                'caption' => $caption?? '',
+                'caption' => $caption ?? '',
             ]);
         } else {
             $response = Http::post($url, [
                 'chat_id' => $chatId,
                 'video' => $videoUrlOrPath,
-                'caption' => $caption?? '',
+                'caption' => $caption ?? '',
             ]);
         }
 
@@ -314,5 +326,25 @@ class TelegramBotServices
         }
 
         return SendPhotoResponse::fromArray($response->json());
+    }
+
+    public static function editMessageText(string $token, $chatId, $messageId, string $newText): SendMessageResponse
+    {
+        $response = Http::post("https://api.telegram.org/bot{$token}/editMessageText", [
+            'chat_id' => $chatId,
+            'message_id' => $messageId,
+            'text' => $newText,
+        ]);
+
+        if ($response->failed() || !$response->json('ok')) {
+            return new SendMessageResponse(
+                false,
+                new TelegramMessage(0, new TelegramChat(0, '', ''), 0, ''),
+                $response->json('description'),
+                $response->json('error_code')
+            );
+        }
+
+        return SendMessageResponse::fromArray($response->json());
     }
 }
