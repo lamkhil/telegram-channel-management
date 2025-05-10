@@ -28,9 +28,6 @@ class PublicPanelProvider extends PanelProvider
             ->id('public')
             ->path('')
             ->login()
-            ->emailVerification(
-                isRequired:false
-            )
             ->registration()
             ->passwordReset()
             ->colors([
