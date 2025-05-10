@@ -28,6 +28,7 @@ class PublicPanelProvider extends PanelProvider
             ->id('public')
             ->path('')
             ->login()
+            ->emailVerification()
             ->registration()
             ->passwordReset()
             ->colors([
@@ -40,9 +41,6 @@ class PublicPanelProvider extends PanelProvider
                 Widgets\AccountWidget::class,
                 Widgets\FilamentInfoWidget::class,
             ])
-            ->emailVerification(
-                isRequired: true
-            )
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
