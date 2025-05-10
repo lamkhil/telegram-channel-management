@@ -66,15 +66,7 @@ class ListTelegramMessages extends ListRecords implements HasForms
     {
         return $form
             ->schema([
-                FileUpload::make('file')
-                    ->label('File')
-                    ->acceptedFileTypes(['image/*', 'video/*', 'audio/*', 'gif/*'])
-                    ->maxSize(1024 * 10)
-                    ->columnSpanFull(),
-                Textarea::make('message')
-                    ->autosize()
-                    ->label('Message'),
-                ComponentsActions::make($this->getTemplate()),
+
                 Select::make('telegram_channel_ids')
                     ->label('Channels')
                     ->multiple()
@@ -83,7 +75,16 @@ class ListTelegramMessages extends ListRecords implements HasForms
                     )
                     ->required()
                     ->native(false)
-                    ->default(TelegramChannel::where('default', true)->pluck('id')->toArray())
+                    ->default(TelegramChannel::where('default', true)->pluck('id')->toArray()),
+                Textarea::make('message')
+                    ->autosize()
+                    ->label('Message'),
+                ComponentsActions::make($this->getTemplate()),
+                FileUpload::make('file')
+                    ->label('File')
+                    ->acceptedFileTypes(['image/*', 'video/*', 'audio/*', 'gif/*'])
+                    ->maxSize(1024 * 10)
+                    ->columnSpanFull(),
 
 
             ])
@@ -163,7 +164,7 @@ class ListTelegramMessages extends ListRecords implements HasForms
                                 $result = TelegramBotServices::sendMessage($bot->token, $channel->chat_id, $message);
                             }
 
-                            
+
                             $channelMessage->update([
                                 'message_id' => $result?->result?->message_id ?? null
                             ]);

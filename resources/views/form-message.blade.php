@@ -1,6 +1,8 @@
 <div>
-    {{ $this->form }}
-    <div class="mt-4 flex justify-end">
+    <div class="flex-justify-end">
         {{ $this->sendAction }}
+    </div>
+    <div class="mt-4 ">
+        {{ $this->form }}
     </div>
 </div>
