@@ -1,5 +1,5 @@
 <div>
-    <div class="flex-justify-end">
+    <div class="flex justify-end">
         {{ $this->sendAction }}
     </div>
     <div class="mt-4 ">
