@@ -16,7 +16,7 @@ class TelegramChannel extends Model
         });
         static::addGlobalScope('user_id', function ($builder) {
             if (Auth::check()) {
-                $builder->where('user_id', Auth::id());
+                $builder->where('telegram_channels.user_id', Auth::id());
             }
         });
     }

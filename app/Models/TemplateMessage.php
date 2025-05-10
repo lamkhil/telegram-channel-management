@@ -16,7 +16,7 @@ class TemplateMessage extends Model
         });
         static::addGlobalScope('user_id', function ($builder) {
             if (Auth::check()) {
-                $builder->where('user_id', Auth::id());
+                $builder->where('template_messages.user_id', Auth::id());
             }
         });
     }

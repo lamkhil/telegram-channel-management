@@ -16,7 +16,7 @@ class TelegramBot extends Model
         });
         static::addGlobalScope('user_id', function ($builder) {
             if (Auth::check()) {
-                $builder->where('user_id', Auth::id());
+                $builder->where('telegram_bots.user_id', Auth::id());
             }
         });
     }

@@ -16,7 +16,7 @@ class TelegramMessage extends Model
         });
         static::addGlobalScope('user_id', function ($builder) {
             if (Auth::check()) {
-                $builder->where('user_id', Auth::id());
+                $builder->where('telegram_messages.user_id', Auth::id());
             }
         });
     }
