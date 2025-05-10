@@ -54,6 +54,7 @@ class PublicPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ])
+            ->favicon(asset('favicon-32x32.png'))
             ->theme(asset('css/filament/public/theme.css'))
             ->plugins([
                 BannerPlugin::make()
