@@ -15,6 +15,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\HtmlString;
 
 class TelegramBotResource extends Resource
 {
@@ -34,6 +35,23 @@ class TelegramBotResource extends Resource
     {
         return $form
             ->schema([
+                Forms\Components\Placeholder::make('botfather_instructions')
+                    ->label('How to Create a Telegram Bot')
+                    ->content(new HtmlString(
+                        "
+                        <ol style='list-style-type: decimal; margin-left: 1.25rem;'>
+                            <li>Open Telegram and search for <a style='color:blue;' href='https://t.me/BotFather' target='_blank'>@BotFather</a>.</li>
+                            <li>Start a chat and send the command <code>/newbot</code>.</li>
+                            <li>Choose a name for your bot (e.g., <code>My Awesome Bot</code>).</li>
+                            <li>Choose a unique username ending with <code>bot</code> (e.g., <code>myawesome_bot</code>).</li>
+                            <li>BotFather will reply with a <strong>token</strong> like <code>123456789:ABCDefGhIJKlmnoPQRstuVWxyZ</code>.</li>
+                            <li>Copy that token and paste it in the form below.</li>
+                            <li>Once submitted, the bot information will be fetched automatically.</li>
+                        </ol>
+                    "
+                    ))->dehydrated(false)
+                    ->columnSpanFull()
+                    ->visibleOn('create'),
                 Forms\Components\TextInput::make('token')
                     ->label('Token')
                     ->required()

@@ -55,6 +55,8 @@ class ListTelegramMessages extends ListRecords implements HasForms
                     $set('message', $template->text);
                     if ($template->file) {
                         $set('file', [$template->file]);
+                    }else{
+                        $set('file', null);
                     }
                 });
         }

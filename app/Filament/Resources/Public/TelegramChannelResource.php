@@ -12,6 +12,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\HtmlString;
 
 class TelegramChannelResource extends Resource
 {
@@ -29,6 +30,21 @@ class TelegramChannelResource extends Resource
     {
         return $form
             ->schema([
+                Forms\Components\Placeholder::make('channel_id_instructions')
+                ->label('How to Get Telegram Channel ID')
+                ->content(new HtmlString("
+                    <ol style='list-style-type: decimal; padding-left: 1.5rem;'>
+                        <li>Open your Telegram app and go to your <strong>Channel</strong>.</li>
+                        <li>Make sure the bot is added as an <strong>Administrator</strong> in the channel.</li>
+                        <li>Send any message in the channel (or forward an existing one).</li>
+                        <li>Use your bot to fetch the update, or enable logging to retrieve the message data.</li>
+                        <li>The <code>Channel ID</code> in the update will look like <code>-1001234567890</code>. Alternatively, you can forward a message from your channel to <a style='color:blue;' href='https://t.me/userinfobot' target='_blank'>@userinfobot</a> to get the channel ID.</li>
+                        <li>Copy the <code>chat.id</code> and paste it in the field below.</li>
+                    </ol>
+
+                "))->dehydrated(false)
+                
+                ->columnSpanFull(),
                 Forms\Components\Select::make('telegram_bot_id')
                     ->relationship('bot', 'name')
                     ->required()
